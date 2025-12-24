@@ -31,7 +31,7 @@ class Cart {
     // Сохранить в localStorage и оповестить другие вкладки
     save() {
         localStorage.setItem(this.storageKey, JSON.stringify(this.items));
-        localStorage.setItem('cart_updated', Date.now().toString()); // Триггер для других вкладок
+        localStorage.setItem('cart_updated', Date.now().toString());
         
         // Обновляем счетчик сразу
         this.updateCounter();
@@ -128,13 +128,11 @@ class Cart {
         
         counters.forEach(counter => {
             counter.textContent = count;
-            // Показываем бейдж только если есть товары
             if (counter.id === 'cartCounter') {
                 counter.style.display = count > 0 ? 'inline-block' : 'none';
             }
         });
         
-        // Обновляем общее количество на странице корзины
         const totalItemsEl = document.getElementById('totalItems');
         if (totalItemsEl) {
             totalItemsEl.textContent = count;
@@ -191,7 +189,7 @@ class Cart {
                             <div class="input-group" style="width: 140px;">
                                 <button class="btn btn-outline-secondary" 
                                         type="button"
-                                        onclick="window.cart.update(${item.product.id}, ${item.quantity - 1}); window.cart.renderCart();">
+                                        onclick="cart.update(${item.product.id}, ${item.quantity - 1}); cart.renderCart();">
                                     <i class="bi bi-dash"></i>
                                 </button>
                                 <input type="text" 
@@ -200,7 +198,7 @@ class Cart {
                                        readonly>
                                 <button class="btn btn-outline-secondary" 
                                         type="button"
-                                        onclick="window.cart.update(${item.product.id}, ${item.quantity + 1}); window.cart.renderCart();">
+                                        onclick="cart.update(${item.product.id}, ${item.quantity + 1}); cart.renderCart();">
                                     <i class="bi bi-plus"></i>
                                 </button>
                             </div>
@@ -210,7 +208,7 @@ class Cart {
                         </div>
                         <div class="col-md-1 col-3 mt-3 mt-md-0 text-center">
                             <button class="btn btn-outline-danger btn-sm" 
-                                    onclick="window.cart.remove(${item.product.id}); window.cart.renderCart();">
+                                    onclick="cart.remove(${item.product.id}); cart.renderCart();">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -273,11 +271,11 @@ class Cart {
                             </div>
                             `}
                             
-                            <button class="btn btn-primary w-100 btn-lg mb-3" onclick="window.cart.checkout()">
+                            <button class="btn btn-primary w-100 btn-lg mb-3" onclick="cart.checkout()">
                                 <i class="bi bi-lock me-2"></i>Перейти к оформлению
                             </button>
                             
-                            <button class="btn btn-outline-danger w-100" onclick="window.cart.clear(); window.cart.renderCart();">
+                            <button class="btn btn-outline-danger w-100" onclick="cart.clear(); cart.renderCart();">
                                 <i class="bi bi-trash me-2"></i>Очистить корзину
                             </button>
                             
@@ -307,14 +305,12 @@ class Cart {
             <strong>Оформление заказа!</strong><br>
             Товаров: ${this.getCount()} шт.<br>
             Сумма: ${this.getTotal()} ₽<br><br>
-            В демо-версии заказ сохраняется в корзине.<br>
-            В реальной системе здесь был бы переход к оплате.
+            В демо-версии заказ сохраняется в корзине.
         `, 'info');
     }
     
     // Показать уведомление
     showNotification(message, type = 'success') {
-        // Удаляем старые уведомления
         const oldNotifications = document.querySelectorAll('.cart-notification');
         oldNotifications.forEach(notification => {
             if (notification.parentNode) {
@@ -379,13 +375,12 @@ window.updateCartCounter = function() {
 document.addEventListener('DOMContentLoaded', () => {
     cart.updateCounter();
     
-    // Если мы на странице корзины, рендерим ее
     if (window.location.pathname.includes('cart.html')) {
         cart.renderCart();
     }
 });
 
-// Экспорт для Node.js (если нужно)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { cart };
-}
+// Простая функция для кнопок
+window.handleAddToCart = function(productId) {
+    return cart.add(productId);
+};

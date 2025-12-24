@@ -1,31 +1,45 @@
 // Общие функции для всего сайта
 document.addEventListener('DOMContentLoaded', function() {
-    // Обновляем счетчик корзины
     updateCartCounter();
     
-    // Инициализируем поиск если есть
     if (document.getElementById('searchInput')) {
         initSearch();
     }
     
-    // Инициализируем фильтры если есть
     if (document.getElementById('filterTags')) {
         initFilters();
     }
     
-    // Добавляем обработчики для кнопок добавления в корзину
+    initCartButtons();
+});
+
+// Инициализация кнопок добавления в корзину
+function initCartButtons() {
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.add-to-cart-btn')) {
-            const button = e.target.closest('.add-to-cart-btn');
-            const productId = parseInt(button.getAttribute('data-id'));
+        const cartButton = e.target.closest('.add-to-cart-btn, [onclick*="addToCart"]');
+        
+        if (cartButton) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            let productId;
+            
+            if (cartButton.hasAttribute('data-id')) {
+                productId = parseInt(cartButton.getAttribute('data-id'));
+            } else if (cartButton.getAttribute('onclick')) {
+                const onclickText = cartButton.getAttribute('onclick');
+                const match = onclickText.match(/addToCart\((\d+)\)/);
+                if (match) {
+                    productId = parseInt(match[1]);
+                }
+            }
+            
             if (productId && window.cart) {
                 window.cart.add(productId);
-                e.preventDefault();
-                e.stopPropagation();
             }
         }
     });
-});
+}
 
 // Инициализация поиска
 function initSearch() {
@@ -43,21 +57,16 @@ function initSearch() {
 // Инициализация фильтров
 function initFilters() {
     const allProducts = Products.getAll();
-    
-    // Собираем все уникальные теги из всех продуктов
     const allTags = new Set();
     allProducts.forEach(product => {
         product.tags.forEach(tag => allTags.add(tag));
     });
     
     const container = document.getElementById('filterTags');
-    
     if (!container) return;
     
-    // Очищаем контейнер
     container.innerHTML = '';
     
-    // Создаем кнопки для каждого тега
     Array.from(allTags).forEach(tag => {
         const button = document.createElement('button');
         button.type = 'button';
@@ -67,7 +76,6 @@ function initFilters() {
         container.appendChild(button);
     });
     
-    // Кнопка сброса
     const resetBtn = document.createElement('button');
     resetBtn.type = 'button';
     resetBtn.className = 'btn btn-outline-danger btn-sm mb-2';
@@ -76,8 +84,6 @@ function initFilters() {
         const searchInput = document.getElementById('searchInput');
         if (searchInput) searchInput.value = '';
         displayAllProducts();
-        
-        // Сбрасываем активные кнопки
         document.querySelectorAll('#filterTags .btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -108,8 +114,6 @@ function filterByTag(tag) {
     
     if (container) {
         renderProducts(products, container);
-        
-        // Показываем активный тег
         document.querySelectorAll('#filterTags .btn').forEach(btn => {
             btn.classList.remove('active');
             if (btn.textContent === tag) {
@@ -126,14 +130,10 @@ function displayAllProducts() {
     
     if (container) {
         renderProducts(products, container);
-        
-        // Обновляем счетчик товаров
         const productsCount = document.getElementById('productsCount');
         if (productsCount) {
             productsCount.textContent = products.length;
         }
-        
-        // Сбрасываем активные кнопки
         document.querySelectorAll('#filterTags .btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -154,7 +154,6 @@ function renderProducts(products, container) {
                 </div>
             </div>
         `;
-        // Обновляем счетчик товаров
         const productsCount = document.getElementById('productsCount');
         if (productsCount) {
             productsCount.textContent = '0';
@@ -162,7 +161,6 @@ function renderProducts(products, container) {
         return;
     }
     
-    // Обновляем счетчик товаров
     const productsCount = document.getElementById('productsCount');
     if (productsCount) {
         productsCount.textContent = products.length;
@@ -181,8 +179,6 @@ function renderProducts(products, container) {
                     <div class="p-3">
                         <h6 class="card-title fw-bold mb-2">${product.name}</h6>
                         <p class="card-text text-muted small mb-3">${product.description}</p>
-                        
-                        <!-- ТЕГИ ЧЕРЕЗ ПРОБЕЛЫ -->
                         <div class="mb-3">
                             ${product.tags.slice(0, 3).map(tag => 
                                 `<span class="badge-tag">${tag}</span>`
@@ -193,8 +189,7 @@ function renderProducts(products, container) {
                 <div class="px-3 pb-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="fw-bold text-primary h5 mb-0">${product.price} ₽</span>
-                        <button class="btn btn-sm btn-primary add-to-cart-btn" 
-                                data-id="${product.id}">
+                        <button class="btn btn-sm btn-primary add-to-cart-btn" data-id="${product.id}">
                             <i class="bi bi-cart-plus"></i> В корзину
                         </button>
                     </div>
@@ -204,11 +199,18 @@ function renderProducts(products, container) {
     `).join('');
 }
 
-// Делаем функции глобальными
+// Глобальные функции
 window.filterProducts = filterProducts;
 window.filterByTag = filterByTag;
 window.displayAllProducts = displayAllProducts;
 window.renderProducts = renderProducts;
+
+// Простая функция для добавления в корзину
+window.addToCart = function(productId) {
+    if (window.cart) {
+        window.cart.add(productId);
+    }
+};
 
 // Обновление счетчика корзины
 window.updateCartCounter = function() {
