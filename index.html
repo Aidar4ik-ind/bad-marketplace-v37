@@ -138,7 +138,6 @@
     <script src="js/cart.js"></script>
     <script src="js/main.js"></script>
     <script>
-        // Загрузка популярных продуктов
         document.addEventListener('DOMContentLoaded', function() {
             updateCartCounter();
             loadFeaturedProducts();
@@ -171,7 +170,7 @@
                                     <a href="product-details.html?id=${product.id}" class="btn btn-sm btn-outline-primary me-1">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <button class="btn btn-sm btn-primary" onclick="addToCart(${product.id})">
+                                    <button class="btn btn-sm btn-primary add-to-cart-btn" data-id="${product.id}">
                                         <i class="bi bi-cart-plus"></i>
                                     </button>
                                 </div>
@@ -182,35 +181,10 @@
             `).join('');
         }
 
-        function addToCart(productId) {
-            if (typeof addToCart === 'function') {
-                window.addToCart(productId);
-                updateCartCounter();
-                showAlert('Товар добавлен в корзину!', 'success');
-            } else if (window.cart && window.cart.add) {
-                window.cart.add(productId);
-                updateCartCounter();
-                showAlert('Товар добавлен в корзину!', 'success');
-            }
-        }
-
         function updateCartCounter() {
-            if (window.cart && cart.getCount) {
-                const count = cart.getCount();
-                document.getElementById('cartCounter').textContent = count;
+            if (window.cart && cart.updateCounter) {
+                cart.updateCounter();
             }
-        }
-
-        function showAlert(message, type = 'success') {
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-            alert.innerHTML = `
-                <i class="bi bi-check-circle me-2"></i>${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
         }
     </script>
 </body>

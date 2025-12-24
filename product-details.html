@@ -13,7 +13,6 @@
         .spec-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .benefit-item { display: flex; align-items: flex-start; margin-bottom: 15px; }
         .benefit-icon { color: #4a6fa5; margin-right: 15px; font-size: 1.2rem; }
-        .back-to-catalog { position: fixed; bottom: 30px; right: 30px; z-index: 1000; }
     </style>
 </head>
 <body>
@@ -67,13 +66,6 @@
         </div>
     </div>
 
-    <!-- Кнопка назад в каталог -->
-    <div class="back-to-catalog">
-        <a href="catalog.html" class="btn btn-primary btn-lg shadow" title="Вернуться в каталог">
-            <i class="bi bi-arrow-left-circle"></i>
-        </a>
-    </div>
-
     <!-- Футер -->
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container text-center">
@@ -88,13 +80,11 @@
     <script src="js/products.js"></script>
     <script src="js/cart.js"></script>
     <script>
-        // Получаем ID товара из URL
         function getProductIdFromURL() {
             const params = new URLSearchParams(window.location.search);
             return parseInt(params.get('id')) || 1;
         }
 
-        // Загрузка деталей товара
         document.addEventListener('DOMContentLoaded', function() {
             updateCartCounter();
             loadProductDetails();
@@ -121,15 +111,9 @@
                 return;
             }
             
-            // Обновляем хлебные крошки
             document.getElementById('productBreadcrumb').textContent = product.name;
             
-            // Получаем связанные товары
-            const relatedProducts = getRelatedProducts(product);
-            
-            // Формируем HTML
             document.getElementById('productDetails').innerHTML = `
-                <!-- Основная информация -->
                 <div class="product-hero rounded mb-5">
                     <div class="row align-items-center">
                         <div class="col-lg-5 mb-4 mb-lg-0">
@@ -152,14 +136,9 @@
                             
                             <div class="d-flex align-items-center mb-4">
                                 <span class="display-4 fw-bold text-primary me-4">${product.price} ₽</span>
-                                <div>
-                                    <button class="btn btn-primary btn-lg px-5" onclick="addToCart(${product.id})">
-                                        <i class="bi bi-cart-plus me-2"></i>Добавить в корзину
-                                    </button>
-                                    <button class="btn btn-outline-primary btn-lg ms-2" onclick="addToCartWithNotification(${product.id})">
-                                        <i class="bi bi-bag-check me-2"></i>Купить сейчас
-                                    </button>
-                                </div>
+                                <button class="btn btn-primary btn-lg px-5 add-to-cart-btn" data-id="${product.id}">
+                                    <i class="bi bi-cart-plus me-2"></i>Добавить в корзину
+                                </button>
                             </div>
                             
                             <div class="row">
@@ -186,73 +165,39 @@
                     </div>
                 </div>
 
-                <!-- Описание и характеристики -->
                 <div class="row">
                     <div class="col-lg-8">
-                        <!-- Описание -->
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-body">
                                 <h3 class="card-title mb-4">
-                                    <i class="bi bi-info-circle text-primary me-2"></i>Подробное описание
+                                    <i class="bi bi-info-circle text-primary me-2"></i>Описание
                                 </h3>
                                 <div class="card-text">
-                                    ${getFullDescription(product)}
+                                    ${product.description}
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Действие -->
                         <div class="card border-0 shadow-sm mb-4">
                             <div class="card-body">
                                 <h3 class="card-title mb-4">
                                     <i class="bi bi-check2-circle text-primary me-2"></i>Действие и эффекты
                                 </h3>
                                 <div class="row">
-                                    ${getEffectsHTML(product.tags)}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Связанные товары -->
-                        ${relatedProducts.length > 0 ? `
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-body">
-                                <h3 class="card-title mb-4">
-                                    <i class="bi bi-arrow-left-right text-primary me-2"></i>Похожие товары
-                                </h3>
-                                <div class="row">
-                                    ${relatedProducts.map(related => `
+                                    ${product.tags.map(tag => `
                                         <div class="col-md-6 mb-3">
-                                            <div class="product-card h-100">
-                                                <a href="product-details.html?id=${related.id}" class="text-decoration-none text-dark">
-                                                    <img src="${related.image}" class="card-img-top" alt="${related.name}" style="height: 150px; object-fit: cover;">
-                                                    <div class="p-3">
-                                                        <h6 class="card-title">${related.name}</h6>
-                                                        <p class="card-text text-muted small mb-2">${related.description}</p>
-                                                        <div class="mb-2">
-                                                            ${related.tags.slice(0, 2).map(tag => 
-                                                                `<span class="badge-tag">${tag}</span>`
-                                                            ).join('')}
-                                                        </div>
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="fw-bold">${related.price} ₽</span>
-                                                            <button class="btn btn-sm btn-primary" onclick="addToCartFromDetails(${related.id}); event.preventDefault();">
-                                                                <i class="bi bi-cart-plus"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </a>
+                                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                                <i class="bi bi-check-lg text-success fs-5 me-3"></i>
+                                                <span class="fw-medium">${tag}</span>
                                             </div>
                                         </div>
                                     `).join('')}
                                 </div>
                             </div>
                         </div>
-                        ` : ''}
                     </div>
                     
                     <div class="col-lg-4">
-                        <!-- Характеристики -->
                         <div class="spec-card sticky-top" style="top: 100px;">
                             <h3 class="mb-4">
                                 <i class="bi bi-card-checklist text-primary me-2"></i>Характеристики
@@ -262,7 +207,7 @@
                                 <tbody>
                                     <tr>
                                         <td class="text-muted" style="width: 40%">Категория:</td>
-                                        <td class="fw-medium">${getCategoryName(product.category)}</td>
+                                        <td class="fw-medium">${product.category || 'Общая поддержка'}</td>
                                     </tr>
                                     
                                     <tr>
@@ -271,40 +216,18 @@
                                     </tr>
                                     
                                     <tr>
-                                        <td class="text-muted">Рекомендация:</td>
-                                        <td class="fw-medium">${getRecommendationText(product.tags)}</td>
-                                    </tr>
-                                    
-                                    ${getCompositionText(product.tags)}
-                                    
-                                    <tr>
                                         <td class="text-muted">Форма выпуска:</td>
-                                        <td class="fw-medium">${getFormText(product.tags)}</td>
+                                        <td class="fw-medium">Капсулы</td>
                                     </tr>
                                     
                                     <tr>
                                         <td class="text-muted">Количество:</td>
-                                        <td class="fw-medium">${getQuantityText(product.tags)}</td>
+                                        <td class="fw-medium">60 капсул</td>
                                     </tr>
                                     
                                     <tr>
                                         <td class="text-muted">Способ применения:</td>
-                                        <td class="fw-medium">${getUsageText(product.tags)}</td>
-                                    </tr>
-                                    
-                                    <tr>
-                                        <td class="text-muted">Производитель:</td>
-                                        <td class="fw-medium">BADDvisor Labs</td>
-                                    </tr>
-                                    
-                                    <tr>
-                                        <td class="text-muted">Срок годности:</td>
-                                        <td class="fw-medium">24 месяца</td>
-                                    </tr>
-                                    
-                                    <tr>
-                                        <td class="text-muted">Условия хранения:</td>
-                                        <td class="fw-medium">При температуре до 25°C</td>
+                                        <td class="fw-medium">1-2 капсулы в день во время еды</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -314,19 +237,14 @@
                                     <i class="bi bi-robot me-2"></i>Спросить у ИИ-ассистента
                                 </a>
                                 
-                                <button class="btn btn-primary w-100 mb-2" onclick="addToCart(${product.id})">
+                                <button class="btn btn-primary w-100 add-to-cart-btn" data-id="${product.id}">
                                     <i class="bi bi-cart-plus me-2"></i>Добавить в корзину
-                                </button>
-                                
-                                <button class="btn btn-success w-100" onclick="addToCartWithNotification(${product.id})">
-                                    <i class="bi bi-bag-check me-2"></i>Купить сейчас
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Важное предупреждение -->
                 <div class="alert alert-warning mt-5">
                     <div class="d-flex">
                         <i class="bi bi-exclamation-triangle fs-4 me-3"></i>
@@ -340,201 +258,6 @@
                     </div>
                 </div>
             `;
-        }
-
-        // Вспомогательные функции
-        function getFullDescription(product) {
-            const descriptions = {
-                'stress': `${product.name} — это специально разработанная формула для поддержки нервной системы в условиях повышенного стресса. Содержит компоненты, способствующие расслаблению и улучшению эмоционального состояния.`,
-                'sleep': `${product.name} создан для нормализации цикла сна и бодрствования. Способствует легкому засыпанию, глубокому сну и легкому пробуждению.`,
-                'energy': `${product.name} — это источник энергии и бодрости. Помогает преодолеть усталость, повысить работоспособность и улучшить общий тонус организма.`,
-                'immunity': `${product.name} разработан для укрепления иммунной системы. Помогает организму противостоять инфекциям и быстрее восстанавливаться после болезней.`,
-                'detox': `${product.name} способствует очищению организма от токсинов, поддерживает функцию печени и улучшает обмен веществ.`,
-                'joints': `${product.name} предназначен для поддержки здоровья суставов. Способствует уменьшению дискомфорта и улучшению подвижности.`,
-                'digestion': `${product.name} помогает нормализовать работу желудочно-кишечного тракта, улучшает пищеварение и способствует поддержанию здоровой микрофлоры.`
-            };
-            
-            return descriptions[product.category] || 
-                   `${product.name} — это высококачественная биологически активная добавка, разработанная для поддержки здоровья и улучшения самочувствия. ${product.description}`;
-        }
-
-        function getEffectsHTML(tags) {
-            const effects = {
-                'магний': 'Снижает нервное напряжение, улучшает сон',
-                'мелатонин': 'Регулирует циркадные ритмы, улучшает качество сна',
-                'энергия': 'Повышает работоспособность, снижает усталость',
-                'иммунитет': 'Укрепляет защитные силы организма',
-                'витамин C': 'Антиоксидантная защита, поддержка иммунитета',
-                'цинк': 'Участвует в иммунных процессах',
-                'пробиотик': 'Восстанавливает микрофлору кишечника',
-                'суставы': 'Поддерживает здоровье хрящевой ткани',
-                'коллаген': 'Улучшает состояние кожи и суставов',
-                'омега-3': 'Противостоит воспалительным процессам',
-                'пищеварение': 'Улучшает работу ЖКТ',
-                'детокс': 'Способствует очищению организма',
-                'стресс': 'Помогает справляться со стрессом',
-                'сон': 'Улучшает качество и продолжительность сна',
-                'концентрация': 'Повышает умственную работоспособность'
-            };
-            
-            // Берем только те эффекты, которые есть в тегах продукта
-            const relevantEffects = tags
-                .filter(tag => effects[tag])
-                .map(tag => effects[tag])
-                .slice(0, 6);
-            
-            // Если не нашли подходящих эффектов, используем общие
-            if (relevantEffects.length === 0) {
-                return `
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-center p-3 bg-light rounded">
-                            <i class="bi bi-check-lg text-success fs-5 me-3"></i>
-                            <span class="fw-medium">Поддержка общего здоровья</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-center p-3 bg-light rounded">
-                            <i class="bi bi-check-lg text-success fs-5 me-3"></i>
-                            <span class="fw-medium">Улучшение самочувствия</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-center p-3 bg-light rounded">
-                            <i class="bi bi-check-lg text-success fs-5 me-3"></i>
-                            <span class="fw-medium">Восполнение дефицита нутриентов</span>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            return relevantEffects.map(effect => `
-                <div class="col-md-6 mb-3">
-                    <div class="d-flex align-items-center p-3 bg-light rounded">
-                        <i class="bi bi-check-lg text-success fs-5 me-3"></i>
-                        <span class="fw-medium">${effect}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function getCategoryName(category) {
-            const categories = {
-                'stress': 'Антистресс и нервы',
-                'sleep': 'Сон и релаксация',
-                'energy': 'Энергия и бодрость',
-                'immunity': 'Иммунитет',
-                'detox': 'Детокс и очищение',
-                'joints': 'Суставы и кости',
-                'digestion': 'Пищеварение'
-            };
-            return categories[category] || 'Общая поддержка';
-        }
-
-        function getRecommendationText(tags) {
-            if (tags.includes('сон') || tags.includes('бессонница')) return 'При нарушениях сна, трудностях с засыпанием';
-            if (tags.includes('стресс') || tags.includes('нервы')) return 'При стрессе, тревожности, нервном напряжении';
-            if (tags.includes('энергия') || tags.includes('усталость')) return 'При хронической усталости, снижении энергии';
-            if (tags.includes('иммунитет') || tags.includes('простуда')) return 'Для укрепления иммунитета, профилактики простуд';
-            if (tags.includes('пищеварение') || tags.includes('желудок')) return 'При проблемах с пищеварением, дискомфорте в ЖКТ';
-            if (tags.includes('суставы') || tags.includes('артрит')) return 'При болях в суставах, снижении подвижности';
-            return 'Для общего укрепления здоровья и улучшения самочувствия';
-        }
-
-        function getCompositionText(tags) {
-            if (tags.includes('магний')) return `
-                <tr>
-                    <td class="text-muted">Основной компонент:</td>
-                    <td class="fw-medium">Магний хелат (высокая биодоступность)</td>
-                </tr>
-            `;
-            if (tags.includes('мелатонин')) return `
-                <tr>
-                    <td class="text-muted">Основной компонент:</td>
-                    <td class="fw-medium">Мелатонин (гормон сна)</td>
-                </tr>
-            `;
-            if (tags.includes('витамин C')) return `
-                <tr>
-                    <td class="text-muted">Основной компонент:</td>
-                    <td class="fw-medium">Витамин C (аскорбиновая кислота)</td>
-                </tr>
-            `;
-            if (tags.includes('коэнзим')) return `
-                <tr>
-                    <td class="text-muted">Основной компонент:</td>
-                    <td class="fw-medium">Коэнзим Q10 (убихинон)</td>
-                </tr>
-            `;
-            if (tags.includes('коллаген')) return `
-                <tr>
-                    <td class="text-muted">Основной компонент:</td>
-                    <td class="fw-medium">Морской коллаген I и III типа</td>
-                </tr>
-            `;
-            return `
-                <tr>
-                    <td class="text-muted">Состав:</td>
-                    <td class="fw-medium">Комплекс натуральных компонентов</td>
-                </tr>
-            `;
-        }
-
-        function getFormText(tags) {
-            if (tags.includes('магний') || tags.includes('витамин')) return 'Таблетки';
-            if (tags.includes('мелатонин') || tags.includes('коэнзим')) return 'Капсулы';
-            if (tags.includes('омега-3') || tags.includes('коллаген')) return 'Мягкие капсулы';
-            return 'Капсулы';
-        }
-
-        function getQuantityText(tags) {
-            if (tags.includes('магний') || tags.includes('мелатонин')) return '60 таблеток';
-            if (tags.includes('витамин C') || tags.includes('коэнзим')) return '90 капсул';
-            if (tags.includes('омега-3')) return '120 мягких капсул';
-            return '60 капсул';
-        }
-
-        function getUsageText(tags) {
-            if (tags.includes('сон') || tags.includes('мелатонин')) return '1 таблетка за 30-60 минут до сна';
-            if (tags.includes('энергия') || tags.includes('коэнзим')) return '1 капсула утром во время еды';
-            if (tags.includes('иммунитет') || tags.includes('витамин C')) return '1-2 таблетки в день с пищей';
-            return '1-2 капсулы в день во время еды';
-        }
-
-        function getRelatedProducts(product) {
-            const allProducts = Products.getAll();
-            // Ищем товары с теми же тегами или той же категорией
-            return allProducts
-                .filter(p => p.id !== product.id) // Исключаем текущий товар
-                .filter(p => 
-                    p.category === product.category || // Та же категория
-                    p.tags.some(tag => product.tags.includes(tag)) // Общие теги
-                )
-                .slice(0, 2); // Максимум 2 товара
-        }
-
-        function addToCart(productId) {
-            if (window.cart) {
-                window.cart.add(productId);
-                updateCartCounter();
-            }
-        }
-
-        function addToCartWithNotification(productId) {
-            if (window.cart) {
-                window.cart.add(productId);
-                updateCartCounter();
-                // Показываем специальное уведомление
-                cart.showNotification(`
-                    <strong>Товар добавлен в корзину!</strong><br>
-                    <a href="cart.html" class="btn btn-sm btn-success mt-2">Перейти к оформлению</a>
-                    <a href="catalog.html" class="btn btn-sm btn-outline-primary mt-2 ms-2">Продолжить покупки</a>
-                `, 'success');
-            }
-        }
-
-        function addToCartFromDetails(productId) {
-            addToCart(productId);
-            cart.showNotification('Товар добавлен в корзину!', 'success');
         }
     </script>
 </body>
