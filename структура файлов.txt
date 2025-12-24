@@ -1,0 +1,19 @@
+bad-marketplace/
+├── index.html
+├── catalog.html
+├── product-details.html
+├── cart.html
+├── assistant.html
+├── css/
+│   └── style.css
+├── js/
+│   ├── products.js
+│   ├── cart.js
+│   ├── main.js
+│   └── ai-rules.js
+└── assets/                    # ← НОВАЯ ПАПКА
+    └── images/                # ← СЮДА КАРТИНКИ
+        ├── magnesium-b6.jpg
+        ├── melatonin.jpg
+        ├── energy-boost.jpg
+        └── ...

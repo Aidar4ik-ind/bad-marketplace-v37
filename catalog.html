@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог БАДов - BADDvisor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { padding-top: 80px; }
+        .catalog-header { background: #f8f9fa; padding: 40px 0; margin-bottom: 30px; }
+        .filter-btn.active { background: #4a6fa5 !important; color: white !important; border-color: #4a6fa5 !important; }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-capsule me-2"></i>BADDvisor
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="catalog.html">Каталог</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="assistant.html">ИИ-ассистент</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="cart.html">
+                            <i class="bi bi-cart3"></i> Корзина
+                            <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Шапка каталога -->
+    <div class="catalog-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold mb-3">Каталог БАДов</h1>
+                    <p class="lead text-muted">Выберите из 30 биологически активных добавок для вашего здоровья</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-inline-block bg-white p-3 rounded shadow-sm">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-box-seam text-primary fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold fs-5" id="productsCount">30</div>
+                                <div class="text-muted small">товаров</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="input-group mb-4">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control border-start-0 ps-0" 
+                           id="searchInput" 
+                           placeholder="Поиск по названию, описанию или тегам...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="sortSelect">
+                    <option selected>Сортировка: по популярности</option>
+                    <option value="price-asc">Цена: по возрастанию</option>
+                    <option value="price-desc">Цена: по убыванию</option>
+                    <option value="name-asc">Название: А-Я</option>
+                    <option value="name-desc">Название: Я-А</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Быстрые фильтры -->
+        <div class="mb-4">
+            <h6 class="mb-3">Быстрый выбор по назначению:</h6>
+            <div id="filterTags" class="d-flex flex-wrap">
+                <!-- Фильтры загружаются через JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Продукты -->
+    <div class="container">
+        <div class="row" id="catalogContainer">
+            <!-- Продукты загружаются через JS -->
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">
+                <small>© 2024 Демо-проект BADDvisor. Все данные вымышлены.</small>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Загрузка каталога
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCounter();
+            displayAllProducts();
+            
+            // Сортировка
+            document.getElementById('sortSelect').addEventListener('change', function(e) {
+                sortProducts(e.target.value);
+            });
+        });
+
+        // Функция сортировки
+        function sortProducts(sortBy) {
+            const products = Products.getAll();
+            let sorted = [...products];
+            
+            switch(sortBy) {
+                case 'price-asc':
+                    sorted.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-desc':
+                    sorted.sort((a, b) => b.price - a.price);
+                    break;
+                case 'name-asc':
+                    sorted.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name-desc':
+                    sorted.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+            }
+            
+            renderProducts(sorted, document.getElementById('catalogContainer'));
+        }
+    </script>
+</body>
+</html>
