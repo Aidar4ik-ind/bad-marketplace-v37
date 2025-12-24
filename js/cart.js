@@ -9,7 +9,6 @@ class Cart {
             if (e.key === this.storageKey) {
                 this.load();
                 this.updateCounter();
-                // Обновляем отображение если на странице корзины
                 if (window.location.pathname.includes('cart.html')) {
                     this.renderCart();
                 }
@@ -28,12 +27,9 @@ class Cart {
         }
     }
     
-    // Сохранить в localStorage и оповестить другие вкладки
+    // Сохранить в localStorage
     save() {
         localStorage.setItem(this.storageKey, JSON.stringify(this.items));
-        localStorage.setItem('cart_updated', Date.now().toString());
-        
-        // Обновляем счетчик сразу
         this.updateCounter();
     }
     
@@ -139,7 +135,7 @@ class Cart {
         }
     }
     
-    // Рендер корзины (для cart.html)
+    // Рендер корзины
     renderCart() {
         if (!document.getElementById('cartContainer')) return;
         
@@ -189,7 +185,7 @@ class Cart {
                             <div class="input-group" style="width: 140px;">
                                 <button class="btn btn-outline-secondary" 
                                         type="button"
-                                        onclick="cart.update(${item.product.id}, ${item.quantity - 1}); cart.renderCart();">
+                                        onclick="window.cart.update(${item.product.id}, ${item.quantity - 1}); window.cart.renderCart();">
                                     <i class="bi bi-dash"></i>
                                 </button>
                                 <input type="text" 
@@ -198,7 +194,7 @@ class Cart {
                                        readonly>
                                 <button class="btn btn-outline-secondary" 
                                         type="button"
-                                        onclick="cart.update(${item.product.id}, ${item.quantity + 1}); cart.renderCart();">
+                                        onclick="window.cart.update(${item.product.id}, ${item.quantity + 1}); window.cart.renderCart();">
                                     <i class="bi bi-plus"></i>
                                 </button>
                             </div>
@@ -208,7 +204,7 @@ class Cart {
                         </div>
                         <div class="col-md-1 col-3 mt-3 mt-md-0 text-center">
                             <button class="btn btn-outline-danger btn-sm" 
-                                    onclick="cart.remove(${item.product.id}); cart.renderCart();">
+                                    onclick="window.cart.remove(${item.product.id}); window.cart.renderCart();">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -271,11 +267,11 @@ class Cart {
                             </div>
                             `}
                             
-                            <button class="btn btn-primary w-100 btn-lg mb-3" onclick="cart.checkout()">
+                            <button class="btn btn-primary w-100 btn-lg mb-3" onclick="window.cart.checkout()">
                                 <i class="bi bi-lock me-2"></i>Перейти к оформлению
                             </button>
                             
-                            <button class="btn btn-outline-danger w-100" onclick="cart.clear(); cart.renderCart();">
+                            <button class="btn btn-outline-danger w-100" onclick="window.cart.clear(); window.cart.renderCart();">
                                 <i class="bi bi-trash me-2"></i>Очистить корзину
                             </button>
                             
@@ -304,8 +300,7 @@ class Cart {
         this.showNotification(`
             <strong>Оформление заказа!</strong><br>
             Товаров: ${this.getCount()} шт.<br>
-            Сумма: ${this.getTotal()} ₽<br><br>
-            В демо-версии заказ сохраняется в корзине.
+            Сумма: ${this.getTotal()} ₽
         `, 'info');
     }
     
@@ -350,37 +345,10 @@ class Cart {
 // Создаем глобальный экземпляр
 const cart = new Cart();
 
-// Глобальные функции
-window.addToCart = function(productId, quantity = 1) {
-    return cart.add(productId, quantity);
-};
-
-window.removeFromCart = function(productId) {
-    return cart.remove(productId);
-};
-
-window.getCart = function() {
-    return cart.getAll();
-};
-
-window.clearCart = function() {
-    return cart.clear();
-};
-
-window.updateCartCounter = function() {
-    return cart.updateCounter();
-};
-
-// Инициализация при загрузке страницы
+// Инициализация
 document.addEventListener('DOMContentLoaded', () => {
     cart.updateCounter();
-    
     if (window.location.pathname.includes('cart.html')) {
         cart.renderCart();
     }
 });
-
-// Простая функция для кнопок
-window.handleAddToCart = function(productId) {
-    return cart.add(productId);
-};
