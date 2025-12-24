@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИИ-ассистент - BADDvisor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { padding-top: 80px; }
+        .ai-header { background: linear-gradient(135deg, #4a6fa5 0%, #2c5282 100%); color: white; padding: 80px 0; }
+        .chat-container { background: white; border-radius: 15px; padding: 20px; height: 400px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .message { max-width: 85%; margin-bottom: 15px; padding: 12px 16px; border-radius: 18px; position: relative; animation: fadeIn 0.3s; }
+        .user-message { background: #4a6fa5; color: white; margin-left: auto; border-bottom-right-radius: 5px; }
+        .ai-message { background: #f0f2f5; color: #333; margin-right: auto; border-bottom-left-radius: 5px; }
+        .symptom-chip { display: inline-block; background: #e3f2fd; color: #1976d2; padding: 8px 16px; margin: 5px; border-radius: 25px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+        .symptom-chip:hover, .symptom-chip.active { background: #1976d2; color: white; transform: translateY(-2px); border-color: #1976d2; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .typing-indicator { display: inline-block; }
+        .typing-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #666; margin: 0 2px; animation: typing 1.4s infinite ease-in-out; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-capsule me-2"></i>BADDvisor
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="catalog.html">Каталог</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="assistant.html">ИИ-ассистент</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="cart.html">
+                            <i class="bi bi-cart3"></i> Корзина
+                            <span id="cartCounter" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Шапка ИИ -->
+    <div class="ai-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Умный ИИ-ассистент</h1>
+                    <p class="lead mb-4">Опишите симптомы, и искусственный интеллект подберет оптимальные БАДы для вашего состояния</p>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white text-primary rounded-circle p-3 me-3">
+                            <i class="bi bi-robot fs-1"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-white mb-0">BADDvisor AI v2.0</h5>
+                            <small class="text-white-50">Улучшенная система рекомендаций</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="bg-white rounded p-4 d-inline-block shadow">
+                        <div class="fs-1 mb-3">🤖💊</div>
+                        <h5>Как работает ИИ?</h5>
+                        <p class="text-muted mb-0">Анализирует 100+ ключевых слов и находит оптимальные БАДы для ваших симптомов</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Быстрые симптомы -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-lightning-charge text-primary me-2"></i>Выберите симптомы
+                        </h5>
+                        <div class="d-flex flex-wrap" id="symptomsContainer">
+                            <div class="symptom-chip" data-symptom="сон">😴 Проблемы со сном</div>
+                            <div class="symptom-chip" data-symptom="стресс">😰 Стресс и тревога</div>
+                            <div class="symptom-chip" data-symptom="усталость">😩 Усталость и слабость</div>
+                            <div class="symptom-chip" data-symptom="иммунитет">🤧 Частые простуды</div>
+                            <div class="symptom-chip" data-symptom="пищеварение">🤢 Проблемы с пищеварением</div>
+                            <div class="symptom-chip" data-symptom="суставы">🦵 Боли в суставах</div>
+                            <div class="symptom-chip" data-symptom="концентрация">🧠 Сложности с концентрацией</div>
+                            <div class="symptom-chip" data-symptom="настроение">😔 Плохое настроение</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Чат с ИИ -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-chat-dots text-primary me-2"></i>Чат с ИИ-ассистентом
+                        </h5>
+                        
+                        <div class="chat-container mb-3" id="chatWindow">
+                            <div class="message ai-message">
+                                <strong>ИИ-ассистент:</strong> Здравствуйте! Я помогу подобрать БАДы для вашего состояния. Опишите, что вас беспокоит, или выберите симптомы выше.<br><br>
+                                <small class="text-muted">Примеры: "Плохо сплю по ночам", "Постоянная усталость и стресс", "Часто болею простудой", "Болят суставы и спина"</small>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <textarea class="form-control" 
+                                      id="aiInput" 
+                                      rows="2" 
+                                      placeholder="Опишите ваши симптомы (например: 'Плохо сплю уже неделю и чувствую постоянную усталость')"></textarea>
+                            <button class="btn btn-primary" id="sendButton">
+                                <i class="bi bi-send"></i> Отправить
+                            </button>
+                        </div>
+                        <div class="form-text mt-2">
+                            Нажмите Enter для отправки, Shift+Enter для новой строки
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Результаты -->
+                <div class="card border-0 shadow-sm" id="resultsCard" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="bi bi-star text-warning me-2"></i>Рекомендации ИИ-ассистента
+                        </h5>
+                        
+                        <div id="aiExplanation" class="alert alert-info mb-4">
+                            <!-- Объяснение ИИ -->
+                        </div>
+                        
+                        <div class="alert alert-warning mb-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Важно:</strong> Это демонстрационная система. Рекомендации носят информационный характер и не заменяют консультацию врача. БАД не является лекарственным средством.
+                        </div>
+                        
+                        <h6 class="mb-3">Рекомендованные БАДы:</h6>
+                        <div class="row" id="recommendedProducts">
+                            <!-- Рекомендованные продукты -->
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button class="btn btn-success" id="addAllBtn" style="display: none;">
+                                <i class="bi bi-cart-check me-2"></i>Добавить все рекомендации в корзину
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Примеры запросов -->
+                <div class="text-center mt-5">
+                    <h6 class="text-muted mb-3">Примеры запросов для тестирования:</h6>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="setExample('Плохо сплю уже неделю, просыпаюсь ночью')">Проблемы со сном</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="setExample('Постоянный стресс на работе, нервное напряжение')">Стресс и нервы</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="setExample('Нет энергии целый день, хроническая усталость')">Усталость</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="setExample('Часто болею простудой, слабый иммунитет')">Иммунитет</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="setExample('Болят колени и спина, хруст в суставах')">Суставы</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="setExample('Плохая концентрация, проблемы с памятью')">Концентрация</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p class="mb-0">
+                <small>© 2024 Демо-проект BADDvisor. Улучшенный ИИ-ассистент v2.0</small>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/ai-rules.js"></script>
+    <script>
+        // Правила для Mock ИИ (базовые)
+        const mockAIRules = {
+            'сон': [1, 2, 26, 27, 30],
+            'спать': [1, 2],
+            'бессонница': [1, 2],
+            'стресс': [1, 6, 7, 9, 25, 28, 29],
+            'нервы': [1, 6, 7],
+            'тревож': [6, 7],
+            'усталость': [3, 8, 9, 10, 24],
+            'энергия': [3, 8, 9, 10, 24],
+            'силы': [3, 9],
+            'иммунитет': [4, 11, 12, 13, 21],
+            'простуда': [4, 11, 21],
+            'болезнь': [4, 11],
+            'пищеварение': [5, 17, 18, 22, 23],
+            'желудок': [17, 18],
+            'суставы': [14, 15, 16, 19, 20],
+            'колени': [14, 19],
+            'спина': [14, 15],
+            'концентрация': [7, 24],
+            'память': [24],
+            'настроение': [1, 6, 25],
+            'детокс': [5, 22]
+        };
+
+        // Объединяем правила
+        const aiRules = {
+            ...mockAIRules,
+            ...(window.aiRulesExtended || {})
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCounter();
+            initAIAssistant();
+        });
+
+        function initAIAssistant() {
+            // Обработчики для чипов симптомов
+            document.querySelectorAll('.symptom-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    // Сбрасываем активные чипы
+                    document.querySelectorAll('.symptom-chip').forEach(c => c.classList.remove('active'));
+                    // Активируем текущий
+                    this.classList.add('active');
+                    
+                    const symptom = this.getAttribute('data-symptom');
+                    const text = this.textContent.replace(/[^\w\s]/g, '').trim();
+                    
+                    // Добавляем в чат
+                    addMessage(text, 'user');
+                    
+                    // Обрабатываем запрос
+                    setTimeout(() => {
+                        processAIRequest(text);
+                    }, 300);
+                });
+            });
+
+            // Кнопка отправки
+            document.getElementById('sendButton').addEventListener('click', sendMessage);
+            
+            // Обработка Enter
+            document.getElementById('aiInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Автофокус на поле ввода
+            document.getElementById('aiInput').focus();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('aiInput').value.trim();
+            if (!input) {
+                cart.showNotification('Введите ваш запрос', 'warning');
+                return;
+            }
+            
+            addMessage(input, 'user');
+            document.getElementById('aiInput').value = '';
+            
+            // Сбрасываем активные чипы
+            document.querySelectorAll('.symptom-chip').forEach(c => c.classList.remove('active'));
+            
+            // Показываем индикатор загрузки
+            const loadingMsg = addTypingIndicator();
+            
+            // Имитация задержки
+            setTimeout(() => {
+                // Удаляем индикатор
+                loadingMsg.remove();
+                
+                // Обрабатываем запрос
+                processAIRequest(input);
+            }, 800 + Math.random() * 700); // Случайная задержка для реалистичности
+        }
+
+        function addMessage(text, sender) {
+            const chatWindow = document.getElementById('chatWindow');
+            const messageDiv = document.createElement('div');
+            
+            messageDiv.className = `message ${sender}-message fade-in`;
+            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'Вы' : 'ИИ-ассистент'}:</strong> ${text}`;
+            
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function addTypingIndicator() {
+            const chatWindow = document.getElementById('chatWindow');
+            const messageDiv = document.createElement('div');
+            
+            messageDiv.className = `message ai-message`;
+            messageDiv.innerHTML = `
+                <strong>ИИ-ассистент:</strong> 
+                <span class="typing-indicator">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </span>
+            `;
+            
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function processAIRequest(input) {
+            // Используем улучшенную логику анализа
+            let analysis;
+            let response;
+            
+            if (window.analyzeHealthRequest && window.generateAIResponse) {
+                analysis = analyzeHealthRequest(input);
+                response = generateAIResponse(analysis);
+            } else {
+                // Резервная логика
+                const inputLower = input.toLowerCase();
+                const foundKeywords = [];
+                const recommendedIds = new Set();
+                
+                Object.keys(aiRules).forEach(keyword => {
+                    if (inputLower.includes(keyword)) {
+                        foundKeywords.push(keyword);
+                        aiRules[keyword].forEach(id => recommendedIds.add(id));
+                    }
+                });
+                
+                const products = Array.from(recommendedIds)
+                    .map(id => Products.getById(id))
+                    .filter(Boolean)
+                    .slice(0, 6);
+                
+                response = {
+                    message: foundKeywords.length > 0 
+                        ? `На основе вашего запроса я определил следующие проблемы: ${foundKeywords.slice(0, 3).join(', ')}.`
+                        : "Вот общие рекомендации для поддержания здоровья:",
+                    explanation: foundKeywords.length > 0 
+                        ? `На основе ключевых слов: <strong>${foundKeywords.slice(0, 3).join(', ')}</strong>. Вот рекомендованные БАДы:`
+                        : "Вот общие рекомендации:",
+                    products: products.length > 0 ? products : Products.getFeatured(3)
+                };
+            }
+            
+            // Добавляем ответ ИИ в чат
+            addMessage(response.message, 'ai');
+            
+            // Показываем результат
+            showRecommendations(response.products, response.explanation);
+        }
+
+        function showRecommendations(products, explanation) {
+            document.getElementById('resultsCard').style.display = 'block';
+            document.getElementById('aiExplanation').innerHTML = explanation;
+            
+            const container = document.getElementById('recommendedProducts');
+            container.innerHTML = products.map(product => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="product-card h-100">
+                        <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 150px; object-fit: cover;">
+                        <div class="p-3">
+                            <h6 class="card-title">${product.name}</h6>
+                            <p class="card-text text-muted small mb-2">${product.description}</p>
+                            <div class="mb-2">
+                                ${product.tags.slice(0, 2).map(tag => 
+                                    `<span class="badge-tag">${tag}</span>`
+                                ).join('')}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">${product.price} ₽</span>
+                                <button class="btn btn-sm btn-primary" onclick="addToCartFromAI(${product.id})">
+                                    <i class="bi bi-cart-plus"></i> В корзину
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            const addAllBtn = document.getElementById('addAllBtn');
+            if (products.length > 1) {
+                addAllBtn.style.display = 'inline-block';
+                addAllBtn.onclick = function() {
+                    products.forEach(p => addToCartFromAI(p.id));
+                    cart.showNotification(`Добавлено ${products.length} товаров в корзину!`, 'success');
+                };
+            } else {
+                addAllBtn.style.display = 'none';
+            }
+            
+            // Прокручиваем к результатам
+            document.getElementById('resultsCard').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        function setExample(text) {
+            document.getElementById('aiInput').value = text;
+            document.getElementById('aiInput').focus();
+        }
+
+        function addToCartFromAI(productId) {
+            if (window.cart && window.cart.add) {
+                window.cart.add(productId);
+                updateCartCounter();
+            }
+        }
+
+        function updateCartCounter() {
+            if (window.cart && cart.updateCounter) {
+                cart.updateCounter();
+            }
+        }
+    </script>
+</body>
+</html>
